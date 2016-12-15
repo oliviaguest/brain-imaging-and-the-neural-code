@@ -1,0 +1,76 @@
+\section{Introduction}
+
+Since the 2012 ImageNet competition~\cite{russakovsky2014imagenet}
+winning entry by Krizhevsky et al~\cite{krizhevsky2012imagenet},
+their network ``AlexNet'' has been successfully applied to a larger variety of
+computer vision tasks, for example to object-detection~\cite{girshick2014rcnn},
+segmentation~\cite{long2015fully}, human pose estimation~\cite{toshev2014deeppose},
+video classification~\cite{karpathy2014large}, object
+tracking~\cite{wang2013learning}, and superresolution~\cite{dong2014learning}.
+
+These successes spurred a new line of research that focused on finding
+higher performing convolutional neural networks. Starting in 2014, the
+quality of network architectures significantly improved
+by utilizing deeper and wider networks. VGGNet~\cite{simonyan2014very} and
+GoogLeNet~\cite{szegedy2015going}
+yielded similarly high performance in the 2014 ILSVRC~\cite{russakovsky2014imagenet}
+classification challenge. One interesting observation was that gains in the
+classification performance tend to transfer to significant quality gains in a
+wide variety of application domains. This means that architectural improvements
+in deep convolutional architecture can be utilized for improving performance for
+most other computer vision tasks that are increasingly reliant on high quality,
+learned visual features.
+Also, improvements in the network quality resulted in new application
+domains for convolutional networks in cases where AlexNet features
+could not compete with hand engineered, crafted solutions,
+e.g. proposal generation in detection\cite{erhan2014scalable}.
+
+Although VGGNet \cite{simonyan2014very} has the compelling feature
+of architectural simplicity, this comes at a high cost: evaluating the
+network requires a lot of computation. On the other hand, the Inception
+architecture of GoogLeNet \cite{szegedy2015going} was also designed to
+perform well even under strict constraints on memory and computational budget.
+For example, GoogleNet employed only 5 million parameters,
+which represented a $12\times$ reduction with respect to its predecessor
+AlexNet, which used $60$ million parameters.
+Furthermore, VGGNet employed about 3x more parameters than AlexNet.
+
+The computational cost of Inception is also much lower than VGGNet or its
+higher performing successors~\cite{he2015delving}. This has made it feasible to
+utilize Inception networks in big-data scenarios\cite{schroff2015facenet},
+\cite{movshovitz2015ontological}, where huge amount of data needed to be
+processed at reasonable cost or scenarios where memory or
+computational capacity is inherently limited, for example in mobile vision
+settings.
+It is certainly possible to mitigate parts of these issues by applying
+specialized solutions to target memory use~\cite{chen2015compressing},
+\cite{psichogios1993svd}
+or by optimizing the execution of certain operations via computational
+tricks~\cite{lavin2015fast}. However, these methods add extra complexity.
+Furthermore, these methods could be applied to optimize the
+Inception architecture
+as well, widening the efficiency gap again.
+
+Still, the complexity of the Inception architecture makes
+it more difficult to make changes to the network. If the architecture is
+scaled up naively, large parts of the computational gains can be immediately
+lost. Also, \cite{szegedy2015going} does not provide a clear description
+about the contributing factors that lead to the various design decisions
+of the GoogLeNet architecture. This makes it much harder to adapt it to new
+use-cases while maintaining its efficiency. For example, if it is deemed
+necessary to increase the capacity of some Inception-style model, the simple
+transformation of just doubling the number of all filter bank sizes
+will lead to a 4x increase in both computational cost and
+number of parameters. This might prove prohibitive or unreasonable
+in a lot of practical scenarios, especially if the associated gains
+are modest. In this paper, we start with describing a few general
+principles and optimization ideas that that proved to be useful for scaling up
+convolution networks in efficient ways. Although our principles
+are not limited to Inception-type networks, they are easier to observe
+in that context as the generic structure of the Inception style building
+blocks is flexible enough to incorporate those constraints naturally.
+This is enabled by the generous use of dimensional reduction and
+parallel structures of the Inception modules which allows for mitigating
+the impact of structural changes on nearby components.
+Still, one needs to be cautious about doing so, as some guiding principles
+should be observed to maintain high quality of the models.

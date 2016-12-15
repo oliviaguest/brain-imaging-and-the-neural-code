@@ -1,0 +1,79 @@
+\section{Performance on Lower Resolution Input}
+
+A typical use-case of vision networks is for the the post-classification of
+detection, for example in the Multibox~\cite{erhan2014scalable} context.
+This includes
+the analysis of a relative small patch of the image containing a single
+object with some context. The tasks is to decide whether the center part
+of the patch corresponds to some object and determine the class of the
+object if it does. The challenge is that objects tend to be relatively
+small and low-resolution. This raises the question of how to properly
+deal with lower resolution input.
+
+The common wisdom is that models employing higher resolution receptive
+fields tend to result in significantly improved recognition performance.
+However it is important to distinguish between the effect of the
+increased resolution of the first layer receptive field and the
+effects of larger model capacitance and computation.
+If we just change the resolution of the input without further
+adjustment to the model, then we end up using computationally much
+cheaper models to solve more difficult tasks.
+Of course, it is natural, that these solutions loose out already because of the
+reduced computational effort. In order to make an accurate assessment,
+the model needs to analyze vague hints in order to be able to
+``hallucinate'' the fine details.
+This is computationally costly. The question remains therefore: how
+much does higher input resolution helps if the computational effort is
+kept constant. One simple way to ensure constant effort is
+to reduce the strides of the first two layer in the case of
+lower resolution input, or by simply removing the first pooling layer of
+the network.
+
+For this purpose we have performed the following three experiments:
+\begin{enumerate}
+  \item $299\times 299$ receptive field with stride $2$ and maximum pooling
+        after the first layer.
+  \item $151\times 151$ receptive field with stride $1$ and maximum pooling
+        after the first layer.
+  \item $79\times 79$ receptive field with stride $1$ and {\bf without}
+        pooling after the first layer.
+\end{enumerate}
+All three networks have almost identical computational cost. Although the third
+network is slightly cheaper, the cost of the pooling layer is marginal
+and (within $1\%$ of the total cost of the)network.
+In each case, the networks were trained until convergence and their
+quality was measured on the validation set of the ImageNet ILSVRC 2012
+classification benchmark. The results can be seen in table~\ref{lowrescmp}.
+Although the lower-resolution networks take longer to train,
+the quality of the final result is quite close to that of their
+higher resolution counterparts.
+
+However, if one would just naively reduce the network size according to the
+input resolution, then network would perform much more poorly. However this
+would an unfair comparison as we would are comparing a 16 times cheaper model on
+a more difficult task.
+
+Also these results of table~\ref{lowrescmp} suggest, one might consider using
+dedicated high-cost low resolution networks for smaller objects in the
+R-CNN~\cite{girshick2014rcnn} context.
+
+\begin{table}
+{
+ \begin{center}
+   \begin{tabular}[H]{|l|l|}
+   \hline
+   {\bf Receptive Field Size} & {\bf Top-1 Accuracy (single frame)}\\
+   \hline\hline
+   $79\times 79$ & 75.2\% \\
+   \hline
+   $151\times 151$ & 76.4\% \\
+   \hline
+   $299\times 299$ & 76.6\% \\
+   \hline
+   \end{tabular}
+ \end{center}
+ }
+\caption{Comparison of recognition performance when the size of the receptive
+field varies, but the computational cost is constant.}
+\label{lowrescmp}
+\end{table}

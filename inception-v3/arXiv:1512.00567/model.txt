@@ -1,0 +1,99 @@
+%autoignore
+# 299 x 299 x 3
+conv = root.Conv(3, 32, stride=2, pad='v')  # pad='v' indicates VALID padding
+# 149 x 149 x 32
+conv_1 = conv.Conv(3, 32, pad='v')
+# 147 x 147 x 64
+conv_2 = conv_1.Conv(3, 64, pad='s')  # The default pad='s' indicates SAME padding
+# 147 x 147 x 64.
+pool = conv_2.MaxPool(3, stride=2, pad='v')
+# 73 x 73 x 80.
+conv_3 = pool.Conv(1, 80, pad='v')
+# 71 x 71 x 192.
+conv_4 = conv_3.Conv(3, 192, pad='v')
+# 35 x 35 x 192.
+pool_1 = conv_4.MaxPool(3, stride=2, pad='v')
+# 35 x 35 x 256.
+mixed = pool_1.Mixed()
+mixed.Conv(1, 64)
+mixed.Tower().Conv(1, 48).Conv(5, 64)   # Padding is SAME per default.
+mixed.Tower().Conv(1, 64).Conv(3, 96).Conv(3, 96)
+mixed.Tower().AvgPool(3).Conv(1, 32)
+mixedjoin = mixed.Join()
+# 35 x 35 x 288.
+mixed_1 = mixedjoin.Mixed()
+mixed_1.Conv(1, 64)
+mixed_1.Tower().Conv(1, 48).Conv(5, 64)
+mixed_1.Tower().Conv(1, 64).Conv(3, 96).Conv(3, 96)
+mixed_1.Tower().AvgPool(3).Conv(1, 64)
+mixed_1join = mixed_1.Join()
+# 35 x 35 x 288.
+mixed_2 = mixed_1join.Mixed()
+mixed_2.Conv(1, 64)
+mixed_2.Tower().Conv(1, 48).Conv(5, 64)
+mixed_2.Tower().Conv(1, 64).Conv(3, 96).Conv(3, 96)
+mixed_2.Tower().AvgPool(3).Conv(1, 64)
+mixed_2join = mixed_2.Join()
+# 17 x 17 x 768.
+mixed_3 = mixed_2join.Mixed()
+mixed_3.Conv(3, 384, stride=2, pad='v')
+mixed_3.Tower().Conv(1, 64).Conv(3, 96).Conv(3, 96, stride=2, pad='v')
+mixed_3.MaxPool(3, stride=2, pad='v')
+mixed_3join = mixed_3.Join()
+# 17 x 17 x 768.
+mixed_4 = mixed_3join.Mixed()
+mixed_4.Conv(1, 192)
+mixed_4.Tower().Conv(1, 128).Conv([1, 7], 128).Conv([7, 1], 192)
+mixed_4.Tower().Conv(1, 128).Conv([7, 1], 128).Conv([1, 7], 128).Conv([7, 1], 128).Conv([1, 7], 192)
+mixed_4.Tower().AvgPool(3).Conv(1, 192)
+mixed_4join = mixed_4.Join()
+# 17 x 17 x 768.
+mixed_5 = mixed_4join.Mixed()
+mixed_5.Conv(1, 192)
+mixed_5.Tower().Conv(1, 160).Conv([1, 7], 160).Conv([7, 1], 192)
+mixed_5.Tower().Conv(1, 160).Conv([7, 1], 160).Conv([1, 7], 160).Conv([7, 1], 160).Conv([1, 7], 192)
+mixed_5.Tower().AvgPool(3).Conv(1, 192)
+mixed_5join = mixed_5.Join()
+# 17 x 17 x 768.
+mixed_6 = mixed_5join.Mixed()
+mixed_6.Conv(1, 192)
+mixed_6.Tower().Conv(1, 160).Conv([1, 7], 160).Conv([7, 1], 192)
+mixed_6.Tower().Conv(1, 160).Conv([7, 1], 160).Conv([1, 7], 160).Conv([7, 1], 160).Conv([1, 7], 192)
+mixed_6.Tower().AvgPool(3).Conv(1, 192)
+mixed_6join = mixed_6.Join()
+# 17 x 17 x 768.
+mixed_7 = mixed_6join.Mixed()
+mixed_7.Conv(1, 192)
+mixed_7.Tower().Conv(1, 192).Conv([1, 7], 192).Conv([7, 1], 192)
+mixed_7.Tower().Conv(1, 192).Conv([7, 1], 192).Conv([1, 7], 192).Conv([7, 1], 192).Conv([1, 7], 192)
+mixed_7.Tower().AvgPool(3).Conv(1, 192)
+mixed_7join = mixed_7.Join()
+# 1008 x 1. Auxiliary softmax.
+head = mixed_7join.Mixed().Tower('').AvgPool(5, stride=3, pad='v').Conv(1, 128)
+head = head.FC(768, pad='v', std=0.01)  # Fully connected bottleneck before the softmax.
+head.Softmax(weight=0.4, label_smoothing=0.1)
+# 17 x 17 x 1280.
+mixed_8 = mixed_7join.Mixed()
+mixed_8.Tower().Conv(1, 192).Conv(3, 320, stride=2, pad='v')
+mixed_8.Tower().Conv(1, 192).Conv([1, 7], 192).Conv([7, 1], 192).Conv(3, 192, stride=2, pad='v')
+mixed_8.MaxPool(3, stride=2, pad='v')
+mixed_8join = mixed_8.Join()
+# 8 x 8 x 2048.
+mixed_9 = mixed_8join.Mixed()
+mixed_9.Conv(1, 320)
+mixed_9.Tower().Conv(1, 384).Mixed(flat=True).Conv([1, 3], 384).Conv([3, 1], 384)
+mixed_9.Tower().Conv(1, 448).Conv(3, 384).Mixed(flat=True).Conv([1, 3], 384).Conv([3, 1], 384)
+mixed_9.Tower().AvgPool(3).Conv(1, 192)
+mixed_9join = mixed_9.Join()
+# 8 x 8 x 2048.
+mixed_10 = mixed_9join.Mixed()
+mixed_10.Conv(1, 320)
+mixed_10.Tower().Conv(1, 384).Mixed(flat=True).Conv([1, 3], 384).Conv([3, 1], 384)
+mixed_10.Tower().Conv(1, 448).Conv(3, 384).Mixed(flat=True).Conv([1, 3], 384).Conv([3, 1], 384)
+mixed_10.Tower().MaxPool(3).Conv(1, 192)
+mixed_10join = mixed_10.Join()
+# 2048 x 1.
+pool_2 = mixed_10join.AvgPool(8, pad='v')
+drop = pool_2.Dropout(keep_probability=0.8)  # Dropping 20%.
+# 1008 way Softmax.
+softmax = drop.Softmax(label_smoothing=0.1)  # Label smoothing with 0.1

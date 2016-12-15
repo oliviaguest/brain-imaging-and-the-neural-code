@@ -1,0 +1,31 @@
+\section{Conclusions}
+
+We have provided several design principles to scale up convolutional networks
+and studied them in the context of the Inception architecture. This
+guidance can lead to high performance vision networks that have a relatively
+modest computation cost compared to simpler, more monolithic architectures.
+Our highest quality version of Inception-v3 reaches $21.2\%$,
+top-$1$ and $5.6\%$ top-5 error for {\bf single crop} evaluation
+on the ILSVR 2012 classification, setting a new state of the art.
+This is achieved with relatively modest ($2.5\times$) increase in computational
+cost compared to the network described in Ioffe et al \cite{ioffe2015batch}.
+Still our solution uses much less computation than the best published
+results based on denser networks: our model outperforms
+the results of He et al \cite{he2015delving} -- cutting the top-$5$ (top-$1$)
+error by $25\%$ ($14\%$) relative, respectively -- while
+being six times cheaper computationally and using at least five times less
+parameters (estimated). Our ensemble of four Inception-v3 models reaches
+$3.5\%$ with multi-crop evaluation reaches $3.5\%$ top-$5$ error which 
+represents an over $25\%$ reduction to the best published results and
+is almost half of the error of ILSVRC 2014 winining GoogLeNet ensemble.
+
+We have also demonstrated that high quality results can be reached with
+receptive field resolution as low as $79\times 79$. This might prove
+to be helpful in systems for detecting relatively small objects.
+We have studied how factorizing convolutions and aggressive dimension
+reductions inside neural network can result in networks with relatively
+low computational cost while maintaining high quality.
+The combination of lower parameter count and additional
+regularization with batch-normalized auxiliary classifiers and
+label-smoothing allows for training high quality networks on relatively
+modest sized training sets.
