@@ -187,7 +187,7 @@ class NeuralCode():
 
     num_x = range(10)
     num_x[0] = 10.4 # 1,2,3
-    num_x[1] = 9.3 # 4
+    num_x[1] = 9.25 # 4
     num_x[2] = 7.8 # 5
     num_x[3] = 6.5 # 6
     num_x[4] = 5.2 # 7
